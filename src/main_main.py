@@ -1,33 +1,17 @@
 from machine import Pin
-from servo import Servo
+#from servo import Servo
 import socket
 import network
 import utime
 import gc
 
 speed = 5
-s1=Servo(0)
-s2=Servo(1)
-s3=Servo(2)
-s4=Servo(3)
-s5=Servo(4)
-s6=Servo(5)
-
-s7=Servo(7)
-s8=Servo(8)
-s9=Servo(9)
-s10=Servo(10)
-s11=Servo(11)
-s12=Servo(12)
-command = " "
-direction_value=-1
-speed_value=-1
 
 def main():
-    #print('lala')
+    print('lala')
     gc.collect()
     # connection password and ssid.
-    ssid = 'Spidey'                  
+    ssid = 'RPI_PICO_AP'                  
     password = '12345678'
     
     # Creating Soft Access Point
@@ -88,132 +72,54 @@ def main():
             # Extract the slider value from the path
             direction_value = path.split('=')[1]
             print('Received direction value:', direction_value)
-            if (int(direction_value)==2):
-                front()
+            front_back()
 
         elif path.startswith('/slider2?'):
             # Extract the slider value from the path
             speed_value = path.split('=')[1]
             print('Received speed value:', speed_value)
             speedd(speed_value)
-        #print(str(command)+"   "+str(direction_value)+ "  " + str(speed_value))
+    
 
         client_socket.close()
     
     
     
 def rotate(cmd):
+    pass
     # Rotate one leg from left hand side and other two from right hand side.
     # Then do the vice versa.
     # We have 90 degrees at nominal position.
     # Rotate 20 degrees.
     # Left leg
     # Pick Up...
-    
-    if str(cmd) == 'right':
-        ############# Right moving...
-        #1, 8,,,,,4, 10,,,,,6, 12
-        
-        pickLeg3(s5, s9, s1)
-        for i in range(90, 59, -1):
-            servo_Angle(i, s6)
-            #servo_Angle(120-(90-i), s12) # -> bring from 130 to 90
-            servo_Angle(i, s2)
-            #servo_Angle(60+(90-i), s8) # -> bring from 50 to 90
-            servo_Angle(i, s10)
-            #servo_Angle(60+(90-i), s4) # -> bring from 50 to 90
-            utime.sleep_ms(speed)
-        putLeg3(s5, s9, s1)
-        pickLeg3(s11, s3, s7)
-        # Come back
-        for i in range(60, 91):
-            servo_Angle(i, s6)
-            #servo_Angle(90+(i-60),s12) # -> bring from 90 to 130
-            servo_Angle(i, s2)
-            #servo_Angle(90-(i-60),s8) # -> bring from 90 to 50
-            servo_Angle(i, s10)
-            #servo_Angle(90-(i-60), s4) # -> bring fromm 90 to 50
-            utime.sleep_ms(speed)
-        putLeg3(s11, s3, s7)
-        ############# Right moving...
-    elif cmd == 'left':
-        ############# Left moving...
-        
-        pickLeg3(s11, s7, s3)
-        for i in range(90, 121 ):
-            servo_Angle(i, s12)
-            servo_Angle(i, s8)
-            servo_Angle(i, s4)
-            utime.sleep_ms(speed)
-        putLeg3(s11, s7, s3)
-        pickLeg3(s5, s9, s1)
-        # Come back
-        for i in range(120, 89, -1):
-            servo_Angle(i, s12)
-            servo_Angle(i, s8)
-            servo_Angle(i, s4)
-            utime.sleep_ms(speed)
-        putLeg3(s5, s9, s1)
-        
-        ############# Left moving...
-def front():
-    ############# Forward moving...
-    
-    # Go forward
-    pickLeg3(s5, s9, s1)
-    for i in range(90, 59, -1):
-        servo_Angle(i, s6)
-        servo_Angle(120-(90-i), s12) # -> bring from 130 to 90
-        servo_Angle(90+(90-i), s2)
-        servo_Angle(60+(90-i), s8) # -> bring from 50 to 90
-        servo_Angle(90+(90-i), s10)
-        servo_Angle(60+(90-i), s4) # -> bring from 50 to 90
-        utime.sleep_ms(speed)
-    putLeg3(s5, s9, s1)
-    pickLeg3(s11, s3, s7)
-    # Come back
-    for i in range(60, 91):
-        servo_Angle(i, s6)
-        servo_Angle(90+(i-60),s12) # -> bring from 90 to 130
-        servo_Angle(120-(i-60), s2)
-        servo_Angle(90-(i-60),s8) # -> bring from 90 to 50
-        servo_Angle(120-(i-60), s10)
-        servo_Angle(90-(i-60), s4) # -> bring fromm 90 to 50
-        utime.sleep_ms(speed)
-    putLeg3(s11, s3, s7)
-    
-    ######### Forward moving...
-    
-    
-    
-def speedd(speed_value):
-    global speed
-    speed = speed_value
-
-def pickLeg(servo):
     for i in range(90, 120):
-        servo_Angle(i, servo)
+        servo_Angle(i, s)
+        utime.sleep_ms(1)
+        servo_Angle(i, s)
+        utime.sleep_ms(1)
+        servo_Angle(i, s)
         utime.sleep_ms(speed)
-        
-def putLeg(servo):
-    for i in range(120, 90, -1):
-        servo_Angle(i, servo)
+    # Move 20 degrees
+    for i in range(90, 110):
+        servo_Angle(i, s)
+        utime.sleep_ms(1)
+        servo_Angle(90-i, s)
         utime.sleep_ms(speed)
-    
-def pickLeg3(servo1, servo2, servo3):
-    for i in range(90, 40, -1):
-        servo_Angle(i, servo1)
-        servo_Angle(i, servo2)
-        servo_Angle(i, servo3)
+    # Go down
+    for i in range(120, 90):
+        servo_Angle(i, s)
         utime.sleep_ms(speed)
-        
-def putLeg3(servo1, servo2, servo3):
-    for i in range(40, 90):
-        servo_Angle(i, servo1)
-        servo_Angle(i, servo2)
-        servo_Angle(i, servo3)
+    # Come back 20 degrees
+    for i in range(110, 90):
+        servo_Angle(i, s)
         utime.sleep_ms(speed)
-        
+
+def front_back():
+    pass
+
+def speedd(speed_value):
+    speed = speed_value
 
 def template():
     html_template = """
