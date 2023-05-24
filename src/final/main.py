@@ -1,10 +1,13 @@
 from machine import Pin
 from servo import Servo
 import socket
+import errno
 import network
 import utime
 import gc
 
+
+check = 0
 speed = 5
 s1=Servo(0)
 s2=Servo(1)
@@ -25,7 +28,7 @@ direction_value=-1
 speed_value=5
 
 def main():
-    global command
+    global command, check
     global direction_value
     global speed_value
     gc.collect()
@@ -53,16 +56,20 @@ def main():
 
     # Create a server socket
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #server_socket.setblocking(False)
     server_socket.bind(('', 80))
     server_socket.listen(1)
-    
-    
 
     # Main server loop
     while True:
         client_socket, addr = server_socket.accept()
+        print('asdjnn')
+        #print(client_socket)
         request = client_socket.recv(1024).decode()
-
+        print('kakak')
+        #print(request)
+    
+        #print('lala')
         # Parse the request path
         path = parse_request(request)
 
@@ -75,6 +82,7 @@ def main():
             command = path.split('=')[1]
             #print('Received command:', command)
             if command == 'left' or command == 'right':
+                start()
                 rotate(command)
             elif command == 'start':
                 start()
@@ -85,19 +93,19 @@ def main():
             # Extract the slider value from the path
             direction_value = path.split('=')[1]
             #print('Received direction value:', direction_value)
-            if (int(direction_value)==2):
+            if int(direction_value) ==  2:
                 front()
-            elif (int(direction_value)==1):
-                start()
-
+            elif int(direction_value) == 1:
+                stop()
         elif path.startswith('/slider2?'):
             # Extract the slider value from the path
             speed_value = path.split('=')[1]
             #print('Received speed value:', speed_value)
-            speedd(speed_value)
+            speedd(int(speed_value))
+        
         print(str(command)+"   "+str(direction_value)+ "  " + str(speed_value))
-
         client_socket.close()
+        
     
 
 def start():
@@ -115,17 +123,17 @@ def start():
     servo_Angle(90, s12)
     
 def stop():
-    servo_Angle(120, s1)
+    servo_Angle(40, s1)
     servo_Angle(90, s2)
-    servo_Angle(120, s3)
+    servo_Angle(40, s3)
     servo_Angle(90, s4)
-    servo_Angle(120, s5)
+    servo_Angle(40, s5)
     servo_Angle(90, s6)
-    servo_Angle(120, s7)
+    servo_Angle(40, s7)
     servo_Angle(90, s8)
-    servo_Angle(120, s9)
+    servo_Angle(40, s9)
     servo_Angle(90, s10)
-    servo_Angle(120, s11)
+    servo_Angle(40, s11)
     servo_Angle(90, s12)
 
 # Function to parse HTTP requests
@@ -227,7 +235,7 @@ def front():
     
 def speedd(speed_value):
     global speed
-    speed = speed_value
+    speed = int(speed_value)
 
 def pickLeg(servo):
     for i in range(90, 120):
@@ -244,7 +252,7 @@ def pickLeg3(servo1, servo2, servo3):
         servo_Angle(i, servo1)
         servo_Angle(i, servo2)
         servo_Angle(i, servo3)
-        utime.sleep_ms(speed)
+        utime.sleep_ms(int(speed))
         
 def putLeg3(servo1, servo2, servo3):
     for i in range(40, 90):
@@ -266,7 +274,7 @@ def template():
       <button id="StopButton" onclick="sendCommand('stop')">Stop</button>
       <br><br>
       <input type="range" id="slider" min="0" max="2" step="1" value="1">
-      <br><br>
+      <br><br>      
       <button onclick="getDirection()">Direction</button>
       <br><br>
       <input type="range" id="slider2" min="2" max="10" step="2" value="5">
